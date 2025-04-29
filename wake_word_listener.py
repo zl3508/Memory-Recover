@@ -1,111 +1,68 @@
-# wake_word_listener.py
-
-import time
-import re
+import os
 import sys
-import subprocess
-from pathlib import Path
+import signal
+import time
+from edge_impulse_linux.audio import AudioImpulseRunner
 
-# === 配置 ===
-LOG_FILE = Path("runner_output.log")
-RUNNER_EXECUTABLE = "/usr/bin/edge-impulse-linux-runner"  # 确保 runner 在 memory_project/ 目录下
-MODEL_PATH = "model.eim"  # Edge Impulse 导出的模型文件
+# 定义常量
+MENU_MODEL_PATH = "/home/student/ollama/memory_project/model.eim"
+YESNO_MODEL_PATH = "/home/student/.ei-linux-runner/models/620884/v2-quantized-runner-linux-aarch64/model.eim"
+THRESHOLD = 0.6
 
-WAKE_WORDS = ["take photo", "hi man"]
-THRESHOLD = 0.7
+runner = None
 
-runner_process = None  # 全局 runner 进程对象
-last_read_pos = 0  # 全局日志读取位置
+def signal_handler(sig, frame):
+    print('Interrupted')
+    if runner:
+        runner.stop()
+    sys.exit(0)
 
-def start_edge_impulse_runner():
-    """启动 edge-impulse-linux-runner，并把输出写入日志文件"""
-    global runner_process
-    if runner_process is not None and runner_process.poll() is None:
-        print("⚡ Runner already running, no need to start.")
-        return
+signal.signal(signal.SIGINT, signal_handler)
 
-    print("🚀 Starting Edge Impulse Runner...")
-    log_file = open(LOG_FILE, "w")  # 每次启动时清空旧日志
-    runner_process = subprocess.Popen(
-        [RUNNER_EXECUTABLE, "--model", MODEL_PATH],
-        stdout=log_file,
-        stderr=subprocess.STDOUT,
-        universal_newlines=True
-    )
-    time.sleep(2)  # 给 runner 稳定时间
+def wait_for_wake_word(model_select="menu", device_id=None):
+    global runner
 
-def stop_edge_impulse_runner():
-    """停止 runner 并确保麦克风资源释放"""
-    global runner_process
-    if runner_process and runner_process.poll() is None:
-        print("🛑 Stopping Edge Impulse Runner...")
-        runner_process.kill()
-        runner_process.wait()
-        runner_process = None
-        time.sleep(2)  # 关键：等麦克风资源释放
+    if model_select == "menu":
+        model_file = MENU_MODEL_PATH
+    elif model_select == "yesno":
+        model_file = YESNO_MODEL_PATH
     else:
-        print("⚡ Runner not running, nothing to stop.")
+        raise ValueError("model_select must be 'menu' or 'yesno'.")
 
-def wait_for_wake_word():
-    """
-    持续监听 runner_output.log，直到检测到指定唤醒词
-    返回检测到的 label (小写)
-    """
-    global last_read_pos
+    dir_path = os.path.dirname(os.path.realpath(__file__))
+    modelfile = os.path.join(dir_path, model_file)
 
-    print("👂 Monitoring runner_output.log for wake words...")
-
-    # 确保 runner 已经启动
-    start_edge_impulse_runner()
-
-    # 等待日志文件生成
-    while not LOG_FILE.exists():
-        print("[INFO] Waiting for runner_output.log to appear...")
-        time.sleep(1)
-
-    while True:
+    with AudioImpulseRunner(modelfile) as runner:
         try:
-            current_size = LOG_FILE.stat().st_size
+            model_info = runner.init()
+            labels = model_info['model_parameters']['labels']
+            print('Loaded runner for "' + model_info['project']['owner'] + ' / ' + model_info['project']['name'] + '"')
 
-            if current_size > last_read_pos:
-                with open(LOG_FILE, "r") as f:
-                    f.seek(last_read_pos)
-                    new_data = f.read()
-                    last_read_pos = f.tell()
+            selected_device_id = 2
+            if device_id is not None:
+                selected_device_id = int(device_id)
+                print("Device ID " + str(selected_device_id) + " has been provided as an argument.")
 
-                if "classifyRes" in new_data:
-                    matches = re.findall(r"'(.*?)': '([\d.]+)'", new_data)
-                    if matches:
-                        predictions = {label: float(score) for label, score in matches}
-                        top_label = max(predictions, key=lambda k: predictions[k])
-                        confidence = predictions[top_label]
+            for res, audio in runner.classifier(device_id=selected_device_id):
+                print('Result (%d ms.) ' % (res['timing']['dsp'] + res['timing']['classification']), end='')
+                for label in labels:
+                    score = res['result']['classification'][label]
+                    print('%s: %.2f\t' % (label, score), end='')
+                print('', flush=True)
 
-                        print(f"🎧 System detected: '{top_label}' with confidence {confidence:.2f}")
+                # 选择最大类别并判断置信度
+                results = res['result']['classification']
+                best_label = max(results, key=results.get)
+                best_score = results[best_label]
 
-                        if confidence >= THRESHOLD:
-                            print(f"✅ Wake word detected: {top_label}")
+                if best_score >= THRESHOLD:
+                    return best_label
 
-                            if top_label.lower() in WAKE_WORDS:
-                                # 🔥 检测到目标唤醒词，停止 runner
-                                stop_edge_impulse_runner()
+        finally:
+            if runner:
+                runner.stop()
 
-                                # ✨ 清空日志，准备下一轮
-                                LOG_FILE.write_text("")
-                                last_read_pos = 0
-
-                                return top_label.lower()
-                            else:
-                                print(f"⚡ Detected '{top_label}', but not a wake word. Ignoring.")
-
-            time.sleep(0.3)
-
-        except Exception as e:
-            print(f"[ERROR] Error while monitoring log: {e}")
-            time.sleep(1)
-
-def restart_edge_impulse_runner():
-    """执行完一次主逻辑后，重新启动 runner 开始下一轮监听"""
-    global last_read_pos
-    stop_edge_impulse_runner()
-    start_edge_impulse_runner()
-    last_read_pos = 0
+# 测试用
+if __name__ == '__main__':
+    label = wait_for_wake_word(model_select="yesno")
+    print(f"Detected label: {label}")

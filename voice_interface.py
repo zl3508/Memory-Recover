@@ -6,6 +6,7 @@ import whisper
 import pyttsx3
 import time
 from scipy.io.wavfile import write as write_wav
+from wake_word_listener import wait_for_wake_word
 
 # Configuration
 SAMPLE_RATE = 16000
@@ -77,17 +78,18 @@ def listen_to_question_with_confirmation() -> str:
 
         speak_text(f"Did you say: {question}? Please say yes or no.")
         
-        confirm_audio = record_audio()
-        confirm_text = recognize_speech(confirm_audio).lower()
-
-        if "yes" in confirm_text.lower():
+        # confirm_audio = record_audio()
+        # confirm_text = recognize_speech(confirm_audio).lower()
+        # 开始监听
+        label = wait_for_wake_word("yesno")
+        print(f"🎯 Detected label: {label}")
+        if label == "yes":
             speak_text("Understood. Processing your request.")
             return question  # ✅ 确认yes后才return
-        elif "no" in confirm_text.lower():
+        elif label == "no":
             speak_text("Okay, let's try again.")
             continue  # ❗ 再录一次问题
         else:
-            speak_text("Sorry, I didn't understand. Please say yes or no.")
             continue
 
 

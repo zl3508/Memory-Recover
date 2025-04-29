@@ -10,8 +10,8 @@ from memory_combiner import combine_memories
 from vector_store import initialize_vector_store, add_memories_to_vector_store, query_similar_memories
 from query_reasoning import generate_answer
 from popup_show_images import popup_images
-from voice_interface import listen_to_question_with_confirmation, speak_text, record_note
-from wake_word_listener import wait_for_wake_word
+from voice_interface import listen_to_question_with_confirmation, speak_text, record_note, wait_for_wake_word
+
 from camera_capture import capture_image
 from runner_controller import start_runner
 
@@ -72,10 +72,10 @@ def interactive_loop():
 
     while True:
         # 开始监听
-        label = wait_for_wake_word()
+        label = wait_for_wake_word("yesno")
         print(f"🎯 Detected label: {label}")
 
-        if label == "take photo":
+        if label == "no":
             speak_text("Take photo mode activated.")
             img_path = capture_image()
             note = record_note()
@@ -85,7 +85,7 @@ def interactive_loop():
 
             sync_memories()
 
-        elif label == "hi man":
+        elif label == "yes":
             speak_text("Hello! Ready to assist your questions.")
             user_question = listen_to_question_with_confirmation()
             if not user_question:
@@ -105,9 +105,9 @@ def interactive_loop():
             print(f"⚡ Ignoring label: {label}")
             continue
 
-        # 每次处理完，重新启动 runner
-        print("🔄 Resuming runner listening...")
-        start_runner()
+        # # 每次处理完，重新启动 runner
+        # print("🔄 Resuming runner listening...")
+        # start_runner()
 
 def main():
     interactive_loop()
