@@ -1,0 +1,13 @@
+__pycache__/
+
+chroma_db/
+
+memory_text/
+
+node_modules/
+
+main.py
+
+memory_demo.ipynb
+
+memory_text.json
