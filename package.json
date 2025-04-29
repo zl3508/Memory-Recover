@@ -1,0 +1,5 @@
+{
+  "dependencies": {
+    "edge-impulse-linux": "file:edge-impulse-linux-1.15.0.tgz"
+  }
+}
