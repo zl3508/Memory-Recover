@@ -86,13 +86,22 @@ def interactive_loop():
             sync_memories()
 
         elif label == "yes":
-            speak_text("Hello! Ready to assist your questions.")
+            speak_text("Ready to assist your questions.")
             user_question = listen_to_question_with_confirmation()
             if not user_question:
                 continue
 
-            matched_memories = query_similar_memories(client, user_question, top_k=5, collection_name=collection_name)
+            # ===== 记录查询相似记忆时间 =====
+            start_query = time.time()
+            matched_memories = query_similar_memories(client, user_question, top_k=3, collection_name=collection_name)
+            end_query = time.time()
+            print(f"🔍 Query similar memories took {end_query - start_query:.3f} seconds.")
+
+            # ===== 记录生成答案时间 =====
+            start_answer = time.time()
             answer = generate_answer(query=user_question, memories=matched_memories)
+            end_answer = time.time()
+            print(f"🧠 Generate answer took {end_answer - start_answer:.3f} seconds.")
 
             speak_text(answer.summary)
 
@@ -105,9 +114,6 @@ def interactive_loop():
             print(f"⚡ Ignoring label: {label}")
             continue
 
-        # # 每次处理完，重新启动 runner
-        # print("🔄 Resuming runner listening...")
-        # start_runner()
 
 def main():
     interactive_loop()
