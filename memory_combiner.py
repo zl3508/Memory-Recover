@@ -8,16 +8,21 @@ from typing import List, Dict
 def combine_memories(user_data: List[Dict], model_data: List[Dict], output_path: Path) -> None:
     """
     Combine user-written and model-generated memory entries, sorted by timestamp, and save to JSON.
-
-    Args:
-        user_data (List[Dict]): List of user memory entries.
-        model_data (List[Dict]): List of model-generated memory entries.
-        output_path (Path): Output JSON file path.
     """
+
+    def parse_timestamp(ts: str) -> datetime:
+        """兼容两种时间格式的解析函数"""
+        for fmt in ("%Y-%m-%d %H:%M:%S", "%Y-%m-%d %H:%M"):
+            try:
+                return datetime.strptime(ts, fmt)
+            except ValueError:
+                continue
+        raise ValueError(f"Unknown timestamp format: {ts}")
+
     combined = user_data + model_data
 
-    # 按照 timestamp 排序
-    combined.sort(key=lambda x: datetime.strptime(x["timestamp"], "%Y-%m-%d %H:%M"))
+    # 按时间戳排序（兼容带秒和不带秒的）
+    combined.sort(key=lambda x: parse_timestamp(x["timestamp"]))
 
     # 保存
     with open(output_path, "w") as f:

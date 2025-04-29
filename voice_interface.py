@@ -68,16 +68,31 @@ def estimate_tts_duration(text: str) -> float:
 def speak_text(text: str):
     print(f"🗣️ Speaking: {text}")
 
-    # 如果文本太短（比如小于2个单词），就跳过
-    if len(text.strip().split()) < 2:
-        print("⚡ Text too short, skipping TTS playback.")
+    # 先整体长度检查
+    if len(text.strip()) < 5:
+        print("⚡ Text too short globally, skipping TTS playback.")
         return
 
-    # 正常用 Coqui TTS 合成+播放
-    wav = tts_model.tts(text)
-    sd.play(wav, samplerate=tts_model.synthesizer.output_sample_rate)
-    sd.wait()
-    time.sleep(0.3)
+    # 自己按标点手动切分
+    sentences = re.split(r'(?<=[.!?])\s*', text.strip())
+
+    # 清理掉过短的子句
+    cleaned_sentences = [s for s in sentences if len(s.strip()) >= 4]
+
+    if not cleaned_sentences:
+        print("⚡ All sentences too short after cleaning, skipping TTS playback.")
+        return
+
+    # 重新拼接成一个干净文本
+    cleaned_text = " ".join(cleaned_sentences)
+
+    try:
+        wav = tts_model.tts(cleaned_text)
+        sd.play(wav, samplerate=tts_model.synthesizer.output_sample_rate)
+        sd.wait()
+        time.sleep(0.3)
+    except Exception as e:
+        print(f"[ERROR] Failed TTS playback: {e}")
 
 def record_audio(duration: int = RECORD_SECONDS) -> np.ndarray:
     """
@@ -121,6 +136,7 @@ def recognize_speech(audio: np.ndarray) -> str:
 def listen_to_question_with_confirmation() -> str:
     while True:
         # 先录问题
+        speak_text("Ready to assist your questions.")
         audio = record_audio()
         question = recognize_speech(audio)
 
@@ -147,7 +163,7 @@ def listen_to_question_with_confirmation() -> str:
                 continue
 
 
-def record_note() -> str:
+def record_note_with_confirmation() -> str:
     """
     Special recording for a photo description, retry if no speech detected.
     """
@@ -156,8 +172,23 @@ def record_note() -> str:
         audio = record_audio()
         note_text = recognize_speech(audio)
 
-        if note_text:
-            return note_text
-        else:
-            speak_text("I didn't catch that. Please describe the photo again.")
 
+        if not note_text:
+            speak_text("I didn't catch that. Please describe the photo again.")
+            continue
+
+        
+        speak_text(f"Did you say: {note_text}? Please say yes or no.")
+        
+        while True:
+            label = wait_for_wake_word("yesno")
+            print(f"🎯 Detected label: {label}")
+            if label == "yes":
+                speak_text("Processing your request.")
+                return note_text  # ✅ 确认yes后才return
+            elif label == "no":
+                speak_text("Let's try again.")
+                break  # ❗ 再录一次问题
+            else:
+                time.sleep(0.1)
+                continue

@@ -29,22 +29,27 @@ def generate_answer(query: str, memories: List[Dict], model_name: str = "llama3.
     ])
 
     prompt = f"""
-You are a helpful memory assistant.
+    You are a memory recovery assistant.
 
-Here is the memory log:
-{context_str}
+    Given the following memory records, your goal is to **help the user vividly recall** their forgotten moments.
 
-User's question: "{query}"
+    Memory records:
+    {context_str}
 
-Based on these records, please infer a short summary answering the user's question.
-Important Instructions:
-- Only select image file paths that are explicitly provided inside [Image: ...] annotations.
-- Do NOT invent, guess, or create any new image file paths.
-- Choose up to 3 images most relevant to your reasoning.
+    User's question: "{query}"
 
-Respond strictly in JSON format following this schema:
-- summary: A brief explanation
-- image_refs: A list of up to 3 image paths
+    Please:
+    - Analyze the most relevant memories based on the question.
+    - Summarize the related memories into a short, vivid answer.
+    - Recommend up to 3 specific images that best support the answer (only from [Image: ...] entries).
+
+    Important Instructions:
+    - Do NOT invent or hallucinate any new memory or image.
+    - Keep your summary natural, concise, emotional if appropriate.
+
+    Respond strictly in JSON format with this schema:
+    - summary: A brief explanation
+    - image_refs: A list of up to 3 image paths
     """
 
     # ✅ 调用本地 Ollama + instructor function-calling

@@ -3,6 +3,7 @@
 import time
 from pathlib import Path
 import json
+from datetime import datetime
 
 from image_processing import generate_image_descriptions
 from user_note_processing import load_user_notes
@@ -10,11 +11,14 @@ from memory_combiner import combine_memories
 from vector_store import initialize_vector_store, add_memories_to_vector_store, query_similar_memories
 from query_reasoning import generate_answer
 from popup_show_images import popup_images
-from voice_interface import listen_to_question_with_confirmation, speak_text, record_note, wait_for_wake_word
+from voice_interface import listen_to_question_with_confirmation, speak_text, record_note_with_confirmation, wait_for_wake_word
 
 from camera_capture import capture_image
 from runner_controller import start_runner
 
+import os
+
+os.environ["DISPLAY"] = ":0"
 # === 配置 ===
 image_folder = Path("memory_images")
 model_output_json = Path("memory_text_model.json")
@@ -50,9 +54,34 @@ def save_user_note(img_path: str, note: str):
     else:
         existing_notes = []
 
-    timestamp = time.strftime("%Y-%m-%d %H:%M")
+    img_filename = Path(img_path).stem
+    parts = img_filename.split("_")
+    if len(parts) >= 3:
+        timestamp_raw = parts[1] + parts[2]
+        try:
+            if len(timestamp_raw) == 14:
+                dt = datetime.strptime(timestamp_raw, "%Y%m%d%H%M%S").strftime("%Y-%m-%d %H:%M:%S")
+            elif len(timestamp_raw) == 12:
+                dt = datetime.strptime(timestamp_raw, "%Y%m%d%H%M").strftime("%Y-%m-%d %H:%M")
+            elif len(timestamp_raw) == 10:
+                dt = datetime.strptime(timestamp_raw, "%Y%m%d%H").strftime("%Y-%m-%d %H")
+            else:
+                print(f"⚠️ Unexpected timestamp length in filename: {img_path}")
+                dt = None
+        except Exception as e:
+            print(f"❌ Failed to parse timestamp from {img_path}: {e}")
+            dt = None
+    else:
+        print(f"⚠️ Unexpected filename format: {img_path}")
+        dt = None
+
+    if dt is None:
+        # 如果无法从文件名提取时间，才退回用系统当前时间
+        dt = time.strftime("%Y-%m-%d %H:%M")
+
+    # === 新建用户条目 ===
     new_entry = {
-        "timestamp": timestamp,
+        "timestamp": dt,
         "description": note,
         "image_path": img_path,
         "source": "user"
@@ -62,7 +91,7 @@ def save_user_note(img_path: str, note: str):
     with open(user_json_path, "w") as f:
         json.dump(existing_notes, f, indent=2, ensure_ascii=False)
 
-    print("✅ User note saved.")
+    print(f"✅ User note saved for {img_path} at {dt}")
 
 def interactive_loop():
     """
@@ -76,17 +105,17 @@ def interactive_loop():
         print(f"🎯 Detected label: {label}")
 
         if label == "no":
-            speak_text("Take photo mode activated.")
+            speak_text("Ready to take a photo.")
             img_path = capture_image()
-            note = record_note()
-
-            save_user_note(img_path, note)
+            user_note = record_note_with_confirmation()
+            if not user_note:
+                continue
+            save_user_note(img_path, user_note)
             speak_text("Photo and note saved successfully.")
 
             sync_memories()
 
         elif label == "yes":
-            speak_text("Ready to assist your questions.")
             user_question = listen_to_question_with_confirmation()
             if not user_question:
                 continue
