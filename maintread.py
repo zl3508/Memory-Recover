@@ -18,6 +18,10 @@ from runner_controller import start_runner
 
 import os
 
+# TODO： 1.完成VLM后台自动检索新增图片自动运行
+# 2. 检查是否可以在VLM运行的同时，进行RAG LLM检索
+# 3. 在LLM 的Rrompt里面添加“现在时间”（树莓派本地时间，树莓派本地时间貌似有点问题）
+
 os.environ["DISPLAY"] = ":0"
 # === 配置 ===
 image_folder = Path("memory_images")
