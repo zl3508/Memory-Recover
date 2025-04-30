@@ -21,10 +21,6 @@ from runner_controller import start_runner
 import os
 from multiprocessing import Process
 
-# TODO： 1.完成VLM后台自动检索新增图片自动运行
-# 2. 检查是否可以在VLM运行的同时，进行RAG LLM检索
-# 3. 在LLM 的Rrompt里面添加“现在时间”（树莓派本地时间，树莓派本地时间貌似有点问题）
-
 os.environ["DISPLAY"] = ":0"
 # === 配置 ===
 image_folder = Path("memory_images")
@@ -118,10 +114,10 @@ def interactive_loop():
 
     while True:
         # 开始监听
-        label = wait_for_wake_word("yesno")
+        label = wait_for_wake_word("menu")
         print(f"🎯 Detected label: {label}")
 
-        if label == "no":
+        if label == "takephoto":
             speak_text("Ready to take a photo.")
             img_path = capture_image()
             user_note = record_note_with_confirmation()
@@ -149,7 +145,7 @@ def interactive_loop():
         
             speak_text("Memory Assistant is ready. Listening for your commands.")
 
-        elif label == "yes":
+        elif label == "himan":
             user_question = listen_to_question_with_confirmation()
             if not user_question:
                 continue
@@ -184,8 +180,8 @@ def interactive_loop():
 
 def preload_ollama_models():
     models_to_preload = [
-        {"model": "llama3.2:3b", "prompt": "Hello!", "images": []},
-        {"model": "llava-phi3:3.8b", "prompt": "Describe this image.", "images": []}
+        {"model": "llava-phi3:3.8b", "prompt": "Describe this image.", "images": []},
+        {"model": "llama3.2:3b", "prompt": "Hello!", "images": []}
     ]
     for m in models_to_preload:
         try:
