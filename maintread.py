@@ -4,6 +4,8 @@ import time
 from pathlib import Path
 import json
 from datetime import datetime
+import requests
+
 
 from image_processing import generate_image_descriptions
 from user_note_processing import load_user_notes
@@ -112,7 +114,7 @@ def interactive_loop():
     """
     主循环：等待唤醒词 -> 执行 -> 回到监听
     """
-    speak_text("Memory Assistant is ready. Listening for your commands.")
+    speak_text("Memory Assistant is ready. Listening for your commands. Please say take photo or hi man.")
 
     while True:
         # 开始监听
@@ -127,9 +129,25 @@ def interactive_loop():
                 continue
             save_user_note(img_path, user_note)
             speak_text("Photo and note saved successfully.")
+            
+            speak_text("Do you want me to describe photos? Please say yes or no.")
 
-            # some ...
-            generate_image_descriptions(image_folder, model_output_json)
+            while True:
+                label_vlm = wait_for_wake_word("yesno")
+                if label_vlm == "yes":
+                    start_query = time.time()
+                    generate_image_descriptions(image_folder, model_output_json)
+                    end_query = time.time()
+                    print(f"🔍 generate_image_descriptions took {end_query - start_query:.3f} seconds.")
+                    speak_text("The photo has been processed.")
+                    break
+                elif label_vlm == "no":
+                    speak_text("Okay, skipping image description.")
+                    break
+                else:
+                    continue
+        
+            speak_text("Memory Assistant is ready. Listening for your commands.")
 
         elif label == "yes":
             user_question = listen_to_question_with_confirmation()
@@ -139,7 +157,8 @@ def interactive_loop():
 
             # ===== 记录查询相似记忆时间 =====
             start_query = time.time()
-            matched_memories = query_similar_memories(client, user_question, top_k=3, collection_name=collection_name)
+            # I think topk =3 or 8 , the speed is the same for LLM prompt
+            matched_memories = query_similar_memories(client, user_question, top_k=8, collection_name=collection_name)
             end_query = time.time()
             print(f"🔍 Query similar memories took {end_query - start_query:.3f} seconds.")
 
@@ -156,14 +175,33 @@ def interactive_loop():
             else:
                 print("⚡ No reference images to display.")
 
+            speak_text("Memory Assistant is ready. Listening for your commands.")
+
         else:
-            print(f"⚡ Ignoring label: {label}")
+            # print(f"⚡ Ignoring label: {label}")
             continue
 
 
+def preload_ollama_models():
+    models_to_preload = [
+        {"model": "llama3.2:3b", "prompt": "Hello!", "images": []},
+        {"model": "llava-phi3:3.8b", "prompt": "Describe this image.", "images": []}
+    ]
+    for m in models_to_preload:
+        try:
+            res = requests.post("http://localhost:11434/api/generate", json={
+                "model": m["model"],
+                "prompt": m["prompt"],
+                "images": m["images"],
+                "stream": False,
+            })
+            print(f"✅ Preloaded model {m['model']}")
+        except Exception as e:
+            print(f"⚠️ Failed to preload {m['model']}: {e}")
+
 def main():
     # vlm_process.start()
-
+    # preload_ollama_models()
     interactive_loop() 
 
 if __name__ == "__main__":

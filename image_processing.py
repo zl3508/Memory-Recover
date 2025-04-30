@@ -31,16 +31,13 @@ def generate_image_descriptions(image_folder: Path, output_json: Path) -> None:
     for img_path in image_folder.glob("*.jpg"):
         img_path_str = str(img_path)
         if img_path_str in processed_images:
-            print(f"⚡ Skipping already processed: {img_path.name}")
+            # print(f"⚡ Skipping already processed: {img_path.name}")
             continue
 
         print(f"🚀 Processing new image: {img_path.name}")
         try:
-            with Image.open(img_path) as image:
-                image = image.resize((576, 324))
-                buffer = io.BytesIO()
-                image.save(buffer, format="JPEG")
-                image_bytes = buffer.getvalue()
+            with open(img_path, "rb") as f:
+                image_bytes = f.read()
 
             # 提取时间
             parts = img_path.stem.split("_")

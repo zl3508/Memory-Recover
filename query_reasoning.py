@@ -32,27 +32,24 @@ def generate_answer(query: str, memories: List[Dict], model_name: str = "llama3.
 
     timestamp = datetime.now(timezone("America/New_York"))
     prompt = f"""
-    You are a memory recovery assistant.
+You are a memory assistant.
 
-    Given the following memory records, your goal is to **help the user vividly recall** their forgotten moments.
+Based on the following memory records, help the user recall a forgotten moment.
 
-    Memory records:
-    {context_str}
+Memory records:
+{context_str}
 
-    The user is trying to recall something. Here's their question (asked at {timestamp}): "{query}"
+User question (asked at {timestamp}): "{query}"
 
-    Please:
-    - Analyze the most relevant memories based on the question.
-    - Summarize the related memories into a short, vivid answer that helps the user **emotionally reconnect** with the past moment.
-    - Recommend up to 3 specific images that best support the answer (only from [Image: ...] entries).
+Instructions:
+- Use only what's in the records.
+- Summarize the most relevant memory in 2-3 sentences.
+- Recommend up to 3 image paths (from [Image: ...]).
 
-    Important Instructions:
-    - Only describe what is actually recorded. Be natural, concise, and emotionally vivid.
-
-    Respond strictly in JSON format with this schema:
-    - summary: A 2-3 sentence summary that helps the user recall the moment.
-    - image_refs: A list of up to 3 image paths
-    """
+Respond in JSON:
+- summary: string
+- image_refs: list of image paths
+"""
 
     # ✅ 调用本地 Ollama + instructor function-calling
     client = instructor.patch(

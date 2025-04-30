@@ -14,11 +14,9 @@ from TTS.api import TTS
 SAMPLE_RATE = 16000
 RECORD_SECONDS = 5
 
-# Initialize TTS engine
-tts_engine = pyttsx3.init()
-tts_engine.setProperty('rate', 100)  # 放慢一点
 # 初始化 Coqui TTS 引擎
-tts_model = TTS(model_name="tts_models/en/ljspeech/speedy-speech", progress_bar=False, gpu=False)
+# or speedy-speech?
+tts_model = TTS(model_name="tts_models/en/ljspeech/glow-tts", progress_bar=False, gpu=False)
 
 
 # Load Whisper model
