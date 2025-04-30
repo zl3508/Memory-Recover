@@ -17,6 +17,7 @@ from camera_capture import capture_image
 from runner_controller import start_runner
 
 import os
+from multiprocessing import Process
 
 # TODO： 1.完成VLM后台自动检索新增图片自动运行
 # 2. 检查是否可以在VLM运行的同时，进行RAG LLM检索
@@ -34,10 +35,19 @@ collection_name = "memories"
 # 初始化向量数据库
 client = initialize_vector_store(persist_dir=chroma_persist_dir)
 
+
+def vlm_loop(interval: int = 5):
+    while True:
+        try:
+            print("🌀 Background VLM started.")
+            generate_image_descriptions(image_folder, model_output_json)
+        except Exception as e:
+            print(f"[sync_loop ERROR] {e}")
+        time.sleep(interval)
+
 def sync_memories():
     try:
         print("🔄 Syncing memories...")
-        generate_image_descriptions(image_folder, model_output_json)
 
         user_data = load_user_notes(user_json_path)
         with open(model_output_json, "r") as f:
@@ -97,6 +107,7 @@ def save_user_note(img_path: str, note: str):
 
     print(f"✅ User note saved for {img_path} at {dt}")
 
+# vlm_process = Process(target=vlm_loop, args=(10,), daemon=True)
 def interactive_loop():
     """
     主循环：等待唤醒词 -> 执行 -> 回到监听
@@ -117,12 +128,14 @@ def interactive_loop():
             save_user_note(img_path, user_note)
             speak_text("Photo and note saved successfully.")
 
-            sync_memories()
+            # some ...
+            generate_image_descriptions(image_folder, model_output_json)
 
         elif label == "yes":
             user_question = listen_to_question_with_confirmation()
             if not user_question:
                 continue
+            sync_memories()
 
             # ===== 记录查询相似记忆时间 =====
             start_query = time.time()
@@ -149,7 +162,9 @@ def interactive_loop():
 
 
 def main():
-    interactive_loop()
+    # vlm_process.start()
+
+    interactive_loop() 
 
 if __name__ == "__main__":
     main()

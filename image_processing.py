@@ -61,24 +61,16 @@ def generate_image_descriptions(image_folder: Path, output_json: Path) -> None:
 
             # 发给模型
             prompt = f"""
-            You are a memory recovery assistant.
+You are a memory assistant.
 
-            Given the attached photo, generate a **natural and vivid** description to help someone recall the moment it was captured, especially for those who might have forgotten.
+Describe the attached photo to help someone recall the moment it was taken.
 
-            Focus on:
-            - The key subjects clearly visible (people, buildings, objects, landscapes).
-            - The broader environment (city street, village home, countryside, indoor room).
-            - Any noticeable time or lighting clues (morning, evening, sunny, rainy).
-            - The overall feeling or mood suggested by the scene (peaceful, lively, nostalgic).
+Photo timestamp: {dt}
 
-            Important:
-            - Write as if you are helping a person emotionally reconnect with their memory.
-            - Be concise but rich, using **no more than 3-4 sentences**.
-            - **Do not invent** objects not seen in the photo.
-            - Keep the tone warm, descriptive, and human — **not mechanical**.
-
-            This photo was taken at: {dt}.
-            """
+Rules:
+- Max 3 sentences, 80 words, no line breaks.
+- Mention only what's clearly visible.
+- Keep the tone warm, human, and vivid."""
             # stateless tasks
             response = ollama.generate(
                 model="llava-phi3:3.8b",
@@ -86,8 +78,9 @@ def generate_image_descriptions(image_folder: Path, output_json: Path) -> None:
                 images=[base64.b64encode(image_bytes).decode("utf-8")],
                 options={
                     "temperature": 0.3,
-                    "num_ctx": 1024,
-                    "num_predict": 300
+                    "top_p": 0.9,
+                    "num_predict": 100,
+                    "repeat_penalty": 1.1
                 }
             )
 

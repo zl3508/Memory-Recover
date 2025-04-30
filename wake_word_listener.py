@@ -7,7 +7,7 @@ from edge_impulse_linux.audio import AudioImpulseRunner
 # 定义常量
 MENU_MODEL_PATH = "/home/student/ollama/memory_project/model.eim"
 YESNO_MODEL_PATH = "/home/student/.ei-linux-runner/models/620884/v2-quantized-runner-linux-aarch64/model.eim"
-THRESHOLD = 0.6
+THRESHOLD = 0.7
 
 runner = None
 
@@ -29,8 +29,7 @@ def wait_for_wake_word(model_select="menu", device_id=None):
     else:
         raise ValueError("model_select must be 'menu' or 'yesno'.")
 
-    dir_path = os.path.dirname(os.path.realpath(__file__))
-    modelfile = os.path.join(dir_path, model_file)
+    modelfile = model_file
 
     with AudioImpulseRunner(modelfile) as runner:
         try:

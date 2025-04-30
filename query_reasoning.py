@@ -4,6 +4,8 @@ from typing import List, Dict
 from openai import OpenAI
 import instructor
 from pydantic import BaseModel, Field
+from datetime import datetime
+from pytz import timezone
 
 # ✅ 定义推理的输出格式
 class MemoryReasoning(BaseModel):
@@ -28,6 +30,7 @@ def generate_answer(query: str, memories: List[Dict], model_name: str = "llama3.
         f"- {m['timestamp']} ({m['source']}): {m['description']} [Image: {m['image_path']}]" for m in memories
     ])
 
+    timestamp = datetime.now(timezone("America/New_York"))
     prompt = f"""
     You are a memory recovery assistant.
 
@@ -36,19 +39,18 @@ def generate_answer(query: str, memories: List[Dict], model_name: str = "llama3.
     Memory records:
     {context_str}
 
-    User's question: "{query}"
+    The user is trying to recall something. Here's their question (asked at {timestamp}): "{query}"
 
     Please:
     - Analyze the most relevant memories based on the question.
-    - Summarize the related memories into a short, vivid answer.
+    - Summarize the related memories into a short, vivid answer that helps the user **emotionally reconnect** with the past moment.
     - Recommend up to 3 specific images that best support the answer (only from [Image: ...] entries).
 
     Important Instructions:
-    - Do NOT invent or hallucinate any new memory or image.
-    - Keep your summary natural, concise, emotional if appropriate.
+    - Only describe what is actually recorded. Be natural, concise, and emotionally vivid.
 
     Respond strictly in JSON format with this schema:
-    - summary: A brief explanation
+    - summary: A 2-3 sentence summary that helps the user recall the moment.
     - image_refs: A list of up to 3 image paths
     """
 
