@@ -139,7 +139,7 @@ def interactive_loop():
                     generate_image_descriptions(image_folder, model_output_json)
                     end_query = time.time()
                     print(f"🔍 generate_image_descriptions took {end_query - start_query:.3f} seconds.")
-                    speak_text("The photo has been processed.")
+                    speak_text("The photos have been processed.")
                     break
                 elif label_vlm == "no":
                     speak_text("Okay, skipping image description.")
