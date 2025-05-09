@@ -12,7 +12,7 @@ from llama_index.core.schema import TextNode
 import numpy as np
 
 # ✅ Step 1: Load Combined Memory Log
-base_dir = Path(__file__).parent  # 当前脚本所在目录
+base_dir = Path(__file__).parent
 with open(base_dir / "memory_combined.json") as f:
     memory_data = json.load(f)
 

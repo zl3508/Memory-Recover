@@ -27,7 +27,6 @@ def load_user_notes(user_json_path: Path) -> List[Dict]:
     if not isinstance(data, list):
         raise ValueError(f"❌ Expected a list of user notes, but got {type(data)}.")
 
-    # 可以在这里额外加一层检查，比如检查每条数据是否有timestamp/description/source
     for idx, entry in enumerate(data):
         if not all(key in entry for key in ("timestamp", "description", "image_path", "source")):
             raise ValueError(f"❌ Invalid entry format at index {idx}: {entry}")

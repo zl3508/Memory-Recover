@@ -39,7 +39,7 @@ def generate_image_descriptions(image_folder: Path, output_json: Path) -> None:
             with open(img_path, "rb") as f:
                 image_bytes = f.read()
 
-            # 提取时间
+            # extract time
             parts = img_path.stem.split("_")
             if len(parts) >= 3:
                 timestamp_raw = parts[1] + parts[2]
@@ -56,7 +56,7 @@ def generate_image_descriptions(image_folder: Path, output_json: Path) -> None:
                 print(f"⚠️ Unexpected filename format: {img_path.name}, skipping.")
                 continue
 
-            # 发给模型
+            # send to model
             prompt = f"""
 You are a memory assistant.
 
@@ -91,10 +91,8 @@ Rules:
                 "source": "model"
             })
 
-            # 防止内存泄露
             gc.collect()
 
-            # 每张图片处理后休息1秒
             time.sleep(1)
 
         except Exception as e:

@@ -22,5 +22,53 @@
     "description": "The image presents a detailed map of the United States, spread out on a wooden table. The map is predominantly in shades of gray and white, with black text providing information about various locations across the country. A notable feature of the map is its scale, which includes both miles and kilometers, catering to an international audience.\n\nOn top left corner of the map, there's a blue booklet titled \"Famous Places in America\", suggesting it might be used as a guide for travelers or tourists interested in visiting iconic landmarks across the United States. \n\nTo the right of the map, there's another booklet named \"Travel Guide to New York City\". This could indicate that the user is planning a trip to New York City and is using these resources to navigate their journey.\n\nThe overall layout suggests a well-organized space for travel planning or geographical study. The presence of both books indicates a blend of traditional guidebooks with detailed maps, providing comprehensive information for travelers.",
     "image_path": "memory_images/img_20250420_1730.jpg",
     "source": "model"
+  },
+  {
+    "timestamp": "2025-04-30 16:04:47",
+    "description": "A sleek black laptop sits closed on a gray table in an office setting. The laptop is positioned near two chairs, one of which has a beige cushion. A window can be seen in the background, suggesting that this scene takes place indoors. The image captures a moment of quiet productivity or perhaps preparation for work.",
+    "image_path": "memory_images/img_20250430_160447.jpg",
+    "source": "model"
+  },
+  {
+    "timestamp": "2025-04-30 16:17:56",
+    "description": "A young man is sitting at a table with his laptop open in front of him. He's holding a can of Pepsi in one hand while eating a sandwich with another. The table appears to be made of wood or metal, and there are two chairs visible behind the man. The background features a window that offers a view of a city street outside.",
+    "image_path": "memory_images/img_20250430_161756.jpg",
+    "source": "model"
+  },
+  {
+    "timestamp": "2025-04-30 16:27:01",
+    "description": "A table with two cans of Pepsi on it. One is blue and one is red. There are also two tickets that say \"Bingo\" on them. A laptop is sitting to the right of the cans. The table appears to be made of marble or granite.",
+    "image_path": "memory_images/img_20250430_162701.jpg",
+    "source": "model"
+  },
+  {
+    "timestamp": "2025-04-30 16:00:50",
+    "description": "The image captures a moment of tranquility in an office setting. A sleek black laptop sits on the left side of a gray desk, its screen facing upwards as if waiting for use. In front of it, a pair of black-framed glasses is casually placed, perhaps belonging to someone who has stepped away momentarily. \n\nOn the right side of the desk, a silver remote control rests, hinting at the possibility of leis",
+    "image_path": "memory_images/img_20250430_160050.jpg",
+    "source": "model"
+  },
+  {
+    "timestamp": "2025-04-30 16:02:48",
+    "description": "A hand is holding a black thermos with a silver lid in front of a window. The window shows a city street with buildings and cars outside. The hand gripping the thermos appears to be that of an adult male. The thermos has some liquid inside, possibly coffee or tea.",
+    "image_path": "memory_images/img_20250430_160248.jpg",
+    "source": "model"
+  },
+  {
+    "timestamp": "2025-04-30 16:03:43",
+    "description": "A person is holding a pair of black sunglasses with red temples in their right hand. The sunglasses are resting on top of their left hand. They are wearing a blue wristband on their left arm. The background features a window that offers a view of a cityscape, complete with buildings and trees.",
+    "image_path": "memory_images/img_20250430_160343.jpg",
+    "source": "model"
+  },
+  {
+    "timestamp": "2025-04-30 16:01:49",
+    "description": "The image captures a serene moment in an office space with two windows that offer a view of a city street outside. The window on the left is closer to us, while the one on the right is further away. Both windows are open, allowing for natural light to flood into the room and brighten up the white wall behind them. A black railing can be seen in front of the window on the right.\n\nThe city street outside is lined with buildings that showcase",
+    "image_path": "memory_images/img_20250430_160149.jpg",
+    "source": "model"
+  },
+  {
+    "timestamp": "2025-04-30 16:21:10",
+    "description": "A man stands in front of a window with a cityscape outside, wearing a black jacket and sunglasses. He is holding a phone to his ear, possibly making or receiving a call. The room he's in has a table and chairs nearby, suggesting it might be a dining area or workspace.",
+    "image_path": "memory_images/img_20250430_162110.jpg",
+    "source": "model"
   }
 ]

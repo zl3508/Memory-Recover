@@ -10,7 +10,6 @@ import hashlib
 def make_id(entry):
     raw = f"{entry['timestamp']} - {entry['description']}"
     return "memory-" + hashlib.md5(raw.encode()).hexdigest()
-# 初始化Embedding模型
 # embed_model = HuggingFaceEmbedding(model_name="BAAI/bge-small-en-v1.5")
 
 # RAG
@@ -32,7 +31,6 @@ def add_memories_to_vector_store(client: chromadb.Client, memory_json_path: Path
     # if collection.count() > 0:
     #     all_records = collection.get(include=["ids"])
     #     existing_ids = set(all_records["ids"])
-    # 一次性准备 [(entry, id, timed_text)] 列表
     prepared = [
         (entry,
         mem_id := make_id(entry),
@@ -82,7 +80,7 @@ def query_similar_memories(client: chromadb.Client, query_text: str, top_k: int 
     matched_memories = []
     for metadata, distance in zip(results["metadatas"][0], results["distances"][0]):
         memory = metadata
-        memory["similarity"] = 1 - distance  # 1 - distance (越接近1越相似)
+        memory["similarity"] = 1 - distance  # 1 - distance
         matched_memories.append(memory)
 
     return matched_memories

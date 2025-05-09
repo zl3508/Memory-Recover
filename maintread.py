@@ -22,7 +22,7 @@ import os
 from multiprocessing import Process
 
 os.environ["DISPLAY"] = ":0"
-# === 配置 ===
+# Config
 image_folder = Path("memory_images")
 model_output_json = Path("memory_text_model.json")
 user_json_path = Path("memory_text_user.json")
@@ -30,7 +30,7 @@ combined_output_json = Path("memory_combined.json")
 chroma_persist_dir = "chroma_db"
 collection_name = "memories"
 
-# 初始化向量数据库
+# Vector DB
 client = initialize_vector_store(persist_dir=chroma_persist_dir)
 
 
@@ -88,10 +88,8 @@ def save_user_note(img_path: str, note: str):
         dt = None
 
     if dt is None:
-        # 如果无法从文件名提取时间，才退回用系统当前时间
         dt = time.strftime("%Y-%m-%d %H:%M")
 
-    # === 新建用户条目 ===
     new_entry = {
         "timestamp": dt,
         "description": note,
@@ -107,13 +105,10 @@ def save_user_note(img_path: str, note: str):
 
 # vlm_process = Process(target=vlm_loop, args=(10,), daemon=True)
 def interactive_loop():
-    """
-    主循环：等待唤醒词 -> 执行 -> 回到监听
-    """
     speak_text("Memory Assistant is ready. Listening for your commands. Please say take photo or hi man.")
 
     while True:
-        # 开始监听
+        # keyword spotting
         label = wait_for_wake_word("menu")
         print(f"🎯 Detected label: {label}")
 
@@ -151,14 +146,12 @@ def interactive_loop():
                 continue
             sync_memories()
 
-            # ===== 记录查询相似记忆时间 =====
             start_query = time.time()
             # I think topk =3 or 8 , the speed is the same for LLM prompt
-            matched_memories = query_similar_memories(client, user_question, top_k=8, collection_name=collection_name)
+            matched_memories = query_similar_memories(client, user_question, top_k=5, collection_name=collection_name)
             end_query = time.time()
             print(f"🔍 Query similar memories took {end_query - start_query:.3f} seconds.")
 
-            # ===== 记录生成答案时间 =====
             start_answer = time.time()
             answer = generate_answer(query=user_question, memories=matched_memories)
             end_answer = time.time()
@@ -180,7 +173,7 @@ def interactive_loop():
 
 def preload_ollama_models():
     models_to_preload = [
-        {"model": "llava-phi3:3.8b", "prompt": "Describe this image.", "images": []},
+        # {"model": "llava-phi3:3.8b", "prompt": "Describe this image.", "images": []},
         {"model": "llama3.2:3b", "prompt": "Hello!", "images": []}
     ]
     for m in models_to_preload:
@@ -197,7 +190,7 @@ def preload_ollama_models():
 
 def main():
     # vlm_process.start()
-    # preload_ollama_models()
+    preload_ollama_models()
     interactive_loop() 
 
 if __name__ == "__main__":

@@ -13,7 +13,6 @@ runner_process = None
 def start_runner():
     global runner_process
 
-    # 启动 runner 并把 stdout 重定向到 log 文件
     print("🚀 Starting Edge Impulse Runner...")
 
     with open(LOG_FILE, "w") as log_file:
@@ -40,8 +39,5 @@ def stop_runner():
         print("⚡ Runner not running, nothing to stop.")
 
 def ensure_log_file_clean():
-    """
-    保证 runner_output.log 文件是干净的。
-    """
     if os.path.exists(LOG_FILE):
         open(LOG_FILE, "w").close()

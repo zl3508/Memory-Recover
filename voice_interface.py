@@ -14,7 +14,6 @@ from TTS.api import TTS
 SAMPLE_RATE = 16000
 RECORD_SECONDS = 5
 
-# 初始化 Coqui TTS 引擎
 # or speedy-speech?
 tts_model = TTS(model_name="tts_models/en/ljspeech/glow-tts", progress_bar=False, gpu=False)
 
@@ -25,27 +24,18 @@ whisper_model = whisper.load_model("base.en")
 import re
 
 def estimate_tts_duration(text: str) -> float:
-    """
-    更准确地估算 TTS 播放时间（秒）。
-    考虑单词数、字符数、标点停顿。
-    """
     words = len(text.split())
     chars = len(text)
     
-    # 统计标点符号数量（.,?! 都可能引起短暂停顿）
     punctuation_pauses = len(re.findall(r'[.,?!]', text))
 
-    # 获取当前 TTS 设定的语速（words per minute）
     words_per_minute = tts_engine.getProperty('rate')
-    words_per_minute = max(words_per_minute, 1)  # 防止除零错误
+    words_per_minute = max(words_per_minute, 1)
 
-    # 基本单词朗读时间
-    base_duration = (words / words_per_minute) * 60  # 单位是秒
+    base_duration = (words / words_per_minute) * 60
 
-    # 假设每个标点带来大约 0.3 秒停顿
     punctuation_delay = punctuation_pauses * 0.3
 
-    # 假设每 100 个字符带来 1 秒处理时间（模拟文本复杂度）
     char_delay = (chars / 100) * 1.0
 
     total_duration = base_duration + punctuation_delay + char_delay
@@ -66,22 +56,18 @@ def estimate_tts_duration(text: str) -> float:
 def speak_text(text: str):
     print(f"🗣️ Speaking: {text}")
 
-    # 先整体长度检查
     if len(text.strip()) < 5:
         print("⚡ Text too short globally, skipping TTS playback.")
         return
 
-    # 自己按标点手动切分
     sentences = re.split(r'(?<=[.!?])\s*', text.strip())
 
-    # 清理掉过短的子句
     cleaned_sentences = [s for s in sentences if len(s.strip()) >= 4]
 
     if not cleaned_sentences:
         print("⚡ All sentences too short after cleaning, skipping TTS playback.")
         return
 
-    # 重新拼接成一个干净文本
     cleaned_text = " ".join(cleaned_sentences)
 
     try:
@@ -133,7 +119,6 @@ def recognize_speech(audio: np.ndarray) -> str:
 
 def listen_to_question_with_confirmation() -> str:
     while True:
-        # 先录问题
         speak_text("Ready to assist your questions.")
         audio = record_audio()
         question = recognize_speech(audio)
@@ -146,16 +131,16 @@ def listen_to_question_with_confirmation() -> str:
         
         # confirm_audio = record_audio()
         # confirm_text = recognize_speech(confirm_audio).lower()
-        # 开始监听
+
         while True:
             label = wait_for_wake_word("yesno")
             print(f"🎯 Detected label: {label}")
             if label == "yes":
                 speak_text("Processing your request.")
-                return question  # ✅ 确认yes后才return
+                return question
             elif label == "no":
                 speak_text("Let's try again.")
-                break  # ❗ 再录一次问题
+                break
             else:
                 time.sleep(0.1)
                 continue
@@ -183,10 +168,10 @@ def record_note_with_confirmation() -> str:
             print(f"🎯 Detected label: {label}")
             if label == "yes":
                 speak_text("Processing your request.")
-                return note_text  # ✅ 确认yes后才return
+                return note_text
             elif label == "no":
                 speak_text("Let's try again.")
-                break  # ❗ 再录一次问题
+                break
             else:
                 time.sleep(0.1)
                 continue

@@ -11,22 +11,22 @@ def capture_image(save_folder="memory_images"):
     save_path = Path(save_folder)
     save_path.mkdir(parents=True, exist_ok=True)
 
-    # 生成文件名：img_年月日_时分秒.jpg
+    # img_ymd_hms.jpg
     timestamp = datetime.now(timezone("America/New_York")).strftime("%Y%m%d_%H%M%S")
     filename = f"img_{timestamp}.jpg"
     filepath = save_path / filename
 
-    # 使用 libcamera-still 拍照
+    # use libcamera-still 
     try:
         print("📸 Capturing image with libcamera-still...")
-        # 先睡一下，避免摄像头没初始化完
+        # sleep for config
         time.sleep(0.5)
         subprocess.run([
             "libcamera-still",
             "-o", str(filepath),
             "--width", "2304",
             "--height", "1296",
-            "-t", "2000"  # 拍照延迟时间2秒，保证清晰
+            "-t", "2000"  # make sure to clear
         ], check=True)
         print(f"✅ Captured and saved image: {filepath}")
     except subprocess.CalledProcessError as e:

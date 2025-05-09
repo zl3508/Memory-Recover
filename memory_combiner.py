@@ -21,10 +21,8 @@ def combine_memories(user_data: List[Dict], model_data: List[Dict], output_path:
 
     combined = user_data + model_data
 
-    # 按时间戳排序（兼容带秒和不带秒的）
     combined.sort(key=lambda x: parse_timestamp(x["timestamp"]))
 
-    # 保存
     with open(output_path, "w") as f:
         json.dump(combined, f, indent=2, ensure_ascii=False)
 

@@ -4,9 +4,9 @@ import signal
 import time
 from edge_impulse_linux.audio import AudioImpulseRunner
 
-# 定义常量
-MENU_MODEL_PATH = "/home/student/.ei-linux-runner/models/680472/v5-quantized-runner-linux-aarch64/model.eim"
-YESNO_MODEL_PATH = "/home/student/.ei-linux-runner/models/620884/v2-quantized-runner-linux-aarch64/model.eim"
+# Parameter
+MENU_MODEL_PATH = "./model_menu.eim"
+YESNO_MODEL_PATH = "/model_yesno"
 THRESHOLD = 0.65
 
 runner = None
@@ -47,7 +47,7 @@ def wait_for_wake_word(model_select="menu", device_id=None):
                 for label in labels:
                     score = res['result']['classification'][label]
                     print('%s: %.2f\t' % (label, score), end='')
-                # 选择最大类别并判断置信度
+                # maxium class and threshold
                 results = res['result']['classification']
                 best_label = max(results, key=results.get)
                 best_score = results[best_label]
@@ -64,7 +64,7 @@ def wait_for_wake_word(model_select="menu", device_id=None):
             if runner:
                 runner.stop()
 
-# 测试用
+# for test
 if __name__ == '__main__':
     label = wait_for_wake_word(model_select="menu")
     print(f"Detected label: {label}")

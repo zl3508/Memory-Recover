@@ -9,7 +9,7 @@ import gc
 def load_and_encode_image(img_path: Path, resize: bool = False) -> str:
     with Image.open(img_path) as image:
         if resize:
-            image = image.resize((576, 324))  # 可调整尺寸
+            image = image.resize((576, 324))
         buffer = io.BytesIO()
         image.save(buffer, format="JPEG")
         image_bytes = buffer.getvalue()
@@ -42,7 +42,7 @@ Rules:
     return response["response"]
 
 def test_resized_vs_original(img_path: str):
-    dt = "2025-04-29 13:00"  # mock timestamp
+    dt = "2025-04-29 13:00"
 
     gc.collect()
 
@@ -65,4 +65,4 @@ def test_resized_vs_original(img_path: str):
 
     gc.collect()
 if __name__ == "__main__":
-    test_resized_vs_original("memory_images/img_20250429_122353.jpg")  # 替换为你要测试的图片路径
+    test_resized_vs_original("memory_images/img_20250429_122353.jpg")
