@@ -11,7 +11,6 @@ def combine_memories(user_data: List[Dict], model_data: List[Dict], output_path:
     """
 
     def parse_timestamp(ts: str) -> datetime:
-        """兼容两种时间格式的解析函数"""
         for fmt in ("%Y-%m-%d %H:%M:%S", "%Y-%m-%d %H:%M"):
             try:
                 return datetime.strptime(ts, fmt)

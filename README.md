@@ -89,6 +89,8 @@ memory-recover/
 ├─ image_processing.py    # VLM captions
 ├─ vector_store.py        # ChromaDB helpers
 ├─ query_reasoning.py     # LLM prompts / answer object
+├─ voice_interface.py     # Text-to-Speech and Speech-to-Text
+├─ wake_word_listener.py  # Keyword spotting
 ├─ memory_images/         # captured JPGs
 ├─ chroma_db/             # persisted vectors
 ├─ memory_text_user.json  # user notes
