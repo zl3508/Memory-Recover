@@ -1,4 +1,4 @@
-# maintread.py
+# mainthread.py
 
 import time
 from pathlib import Path
